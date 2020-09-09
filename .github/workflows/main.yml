@@ -16,7 +16,7 @@ jobs:
       - name: Create Zip File
         uses: montudor/action-zip@v0.1.0
         with:
-          args: zip -qq -r -j orm_stack_private_dns.zip infrastructure/*.tf infrastructure/*.yml
+          args: zip -qq -r -j orm_stack_private_dns.zip . -i infrastructure/*.tf infrastructure/*.yml
       - uses: actions/upload-artifact@v2
         with:
           name: orm_stack_private_dns.zip
