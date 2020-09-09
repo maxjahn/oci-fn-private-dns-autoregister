@@ -15,5 +15,5 @@ jobs:
           args: zip -qq -r -j orm_stack_private_dns.zip . -i infrastructure/*.tf infrastructure/*.yml
       - uses: actions/upload-artifact@v2
         with:
-          name: orm_stack
+          name: orm_stack_private_dns.zip
           path: orm_stack_private_dns.zip
