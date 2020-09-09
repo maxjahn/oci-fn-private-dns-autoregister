@@ -76,7 +76,7 @@ resource "oci_dns_record" "public_vm_record" {
 }
 
 resource "oci_dns_record" "private_vm_record" {
-    count = var.create_oci_public_demo_vm ? 1 : 0
+    count = var.create_oci_private_demo_vm ? 1 : 0
     zone_name_or_id = oci_dns_zone.private_dns_zone.id
     domain = "${var.oci_private_demo_vm_name}.${var.oci_dns_zone}"
     rtype = "A"
