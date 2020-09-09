@@ -13,3 +13,11 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+infrastructure/terraform.tfvars
+**/.terraform
+**/*.tfstate*
+infrastructure/orm-stack-dnszone.zip
+infrastructure/orm-zip.sh
+infrastructure/ips.txt
+**/local_*
+.DS_Store

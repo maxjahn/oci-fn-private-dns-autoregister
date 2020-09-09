@@ -1,0 +1,392 @@
+title: "Private DNS Zone & Autoregistration"
+description: "Private DNS for Oracle OCI"
+schemaVersion: 1.1.0
+version: "20190304"
+locale: "en"
+
+variableGroups:
+  - title: "Hidden Variable Group"
+    visible: false
+    variables:
+      - tenancy_ocid
+      - region
+      - oci_user_ocid
+      - oci_fingerprint
+
+  - title: "DNS Zone"
+    variables:
+      - oci_dns_zone
+      - oci_dns_zone_compartment
+      - create_new_network
+      - create_autoregistration_app_function
+
+  - title: "Create New Network"
+    variables:
+      - oci_compartment_ocid
+      - oci_vcn_name
+      - oci_cidr_vcn
+      - oci_private_subnet_name
+      - oci_cidr_private_subnet
+      - oci_public_subnet_name
+      - oci_cidr_public_subnet
+      - create_oci_private_demo_vm
+      - create_oci_public_demo_vm
+      - public_dns_server
+      - create_dhcp_options_separate
+    visible: ${create_new_network}
+
+  - title: "Create Demo VM in private subnet"
+    variables:
+      - oci_private_demo_vm_name
+      - oci_private_demo_vm_shape
+      - oci_private_demo_vm_sshkey
+    visible: ${create_oci_private_demo_vm}
+
+  - title: "Create Demo VM in public subnet"
+    variables:
+      - oci_public_demo_vm_name
+      - oci_public_demo_vm_shape
+      - oci_public_demo_vm_sshkey
+    visible: ${create_oci_public_demo_vm}
+
+  - title: "Autoregistration Function"
+    variables:
+      - fn_application_name
+      - create_new_fn_application
+      - fn_use_existing_network
+      - fn_application_compartment
+      - fn_application_vcn
+      - fn_application_subnet
+      - create_fn_function
+      - fn_function_image
+      - create_autoregistration_tags
+      - create_tags_fn_application_config
+      - create_autoregister_event
+    visible: ${create_autoregistration_app_function}
+
+  - title: "Users & Policies"
+    variables:
+      - create_iam_dyngroup
+      - create_iam_dyngroup_policy
+      - create_automation_user
+    visible: ${create_autoregistration_app_function}
+
+  - title: "Autoregistration Tags"
+    variables:
+      - tag_autoregister_namespace
+      - tag_autoregister_dnszone
+      - tag_autoregister_dnshostname
+    visible: ${create_autoregistration_tags}
+
+variables:
+  tenancy_ocid:
+    title: "Tenancy ID"
+    description: "The Oracle Cloud Identifier (OCID) for your tenancy"
+    type: string
+    required: true
+    visible: false
+
+  region:
+    title: "Region"
+    description: "The region in which to create all resources"
+    type: oci:identity:region:name
+    required: true
+    visible: false
+
+  oci_user_id:
+    title: "User"
+    type: string
+    required: true
+    visible: false
+
+  public_dns_server:
+    title: "Public DNS Server"
+    description: "IP of the DNS server that will be used for public DNS record lookup."
+    type: string
+    required: true
+    default: "169.254.169.254"
+
+  oci_dns_zone_compartment:
+    type: oci:identity:compartment:id
+    title: "DNS Zone Compartment"
+    default: ${tenancy_ocid}
+    description: "Compartment that DNS Zone will be created in. Use the topmost compartment containing the compartments that will be using private DNS records, e.g. root."
+    required: false
+
+  create_new_network:
+    type: boolean
+    title: "Create new network?"
+    description: "Create a new network for which you want to use your private DNS Zone and the autoregistration function."
+    default: true
+
+  oci_compartment_ocid:
+    type: oci:identity:compartment:id
+    title: "VCN Compartment"
+    description: "Compartment that VCN will be created in"
+    default: ${tenancy_ocid}
+    required: true
+
+  oci_cidr_vcn:
+    type: string
+    title: "VCN CIDR"
+    required: true
+    default: "10.0.0.0/16"
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+
+  oci_vcn_name:
+    type: string
+    title: "VCN Name"
+    required: true
+    default: "app-vcn"
+
+  oci_cidr_private_subnet:
+    type: string
+    title: "Private Subnet CIDR"
+    required: true
+    default: "10.0.1.0/24"
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+
+  oci_private_subnet_name:
+    type: string
+    title: "Private Subnet Name"
+    required: true
+    default: "private-subnet"
+
+  oci_cidr_public_subnet:
+    type: string
+    title: "Public Subnet CIDR"
+    required: true
+    default: "10.0.2.0/24"
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+
+  oci_public_subnet_name:
+    type: string
+    title: "Public Subnet Name"
+    required: true
+    default: "public-subnet"
+
+  create_oci_private_demo_vm:
+    type: boolean
+    title: "Create demo VM in private subnet"
+    description: ""
+    required: false
+    default: false
+
+  oci_private_demo_vm_name:
+    type: string
+    title: "VM Name"
+    required: false
+    default: "vmprivate"
+    pattern: "^[a-z][a-zA-Z0-9]+$"
+
+  oci_private_demo_vm_shape:
+    type: oci:core:instanceshape:name
+    title: "VM Shape"
+    required: false
+    default: "VM.Standard2.1"
+    dependsOn:
+      compartmentId: ${oci_compartment_ocid}
+
+  oci_private_demo_vm_sshkey:
+    type: string
+    title: "Public SSH Key for VM"
+    required: false
+
+  create_oci_public_demo_vm:
+    type: boolean
+    title: "Create demo VM in public subnet"
+    description: ""
+    required: false
+    default: false
+
+  oci_public_demo_vm_name:
+    type: string
+    title: "VM Name"
+    required: false
+    default: "vmpublic"
+    pattern: "^[a-z][a-zA-Z0-9]+$"
+
+  oci_public_demo_vm_shape:
+    type: oci:core:instanceshape:name
+    title: "VM Shape"
+    required: false
+    default: "VM.Standard2.1"
+    dependsOn:
+      compartmentId: ${oci_compartment_ocid}
+
+  oci_public_demo_vm_sshkey:
+    type: string
+    title: "Public SSH Key for VM"
+    required: false
+
+  create_dhcp_options_separate:
+    type: boolean
+    title: "Create separate DHCP options"
+    description: "This will create a separate set of DHCP options using the custom resolver for your private DNS zone. Use this option if you want to enable the custom resolver only for specific subnets of the VCN. Otherwise the default DHCP options will be set to use the custom resolver for all subnets."
+    required: true
+    default: false
+
+  oci_dns_zone:
+    type: string
+    title: "DNS Zone name"
+    required: true
+    default: "cloud.dev"
+
+  create_autoregistration_tags:
+    type: boolean
+    title: "Create Tag Namespace and Tags for Autoregistration"
+    description: "For identifying the VMs which should be handled by the autoregistration function, defined tags are used. Check this option to create these tags."
+    required: true
+    default: false
+
+  tag_autoregister_namespace:
+    type: string
+    title: "Tag Namespace"
+    required: true
+    default: "Automation"
+    visible: ${create_autoregistration_tags}
+
+  tag_autoregister_dnszone:
+    type: string
+    title: "Tag for DNS Zone"
+    required: true
+    default: "DNSZone"
+    visible: ${create_autoregistration_tags}
+
+  tag_autoregister_dnshostname:
+    type: string
+    title: "Tag for DNS Hostname"
+    required: true
+    default: "DNSHostname"
+    visible: ${create_autoregistration_tags}
+
+  create_iam_dyngroup:
+    type: boolean
+    title: "Create dynamic group for serverless function"
+    description: "The autoregistration function will be member of this group."
+    required: true
+    default: false
+
+  create_iam_dyngroup_policy:
+    type: boolean
+    title: "Create policy for dynamic group"
+    description: "The policy will enable the dynamic group to update the DNS Zone records."
+    required: true
+    default: false
+
+  create_automation_user:
+    type: boolean
+    title: "Create a user for development and deployment of serverless functions"
+    description: "This creates a demo user with according rights to deploy serverless functions. Do not do this in tenancies where you plan to run production workloads in."
+    required: true
+    default: false
+
+  fn_use_existing_network:
+    type: boolean
+    title: "Use existing network for functions"
+    description: "If unchecked the network created with this stack in the 'Create New Network' section will be used."
+    required: true
+    default: false
+
+  fn_application_compartment:
+    type: oci:identity:compartment:id
+    title: "Functions Compartment"
+    description: "This is the compartment for the Functions Application."
+    required: true
+    visible: ${fn_use_existing_network}
+
+  fn_application_vcn:
+    type: oci:core:vcn:id
+    title: "VCN for Functions Application"
+    dependsOn:
+      compartmentId: ${fn_application_compartment}
+    visible: ${fn_use_existing_network}
+
+  fn_application_subnet:
+    type: oci:core:subnet:id
+    title: "Subnet for Functions Application"
+    dependsOn:
+      compartmentId: ${fn_application_compartment}
+      vcnId: ${fn_application_vcn}
+    visible: ${fn_use_existing_network}
+
+  create_new_fn_application:
+    type: boolean
+    title: "Create a new Functions Application"
+    description: "This will create new application with name set in Function Application Name"
+    required: true
+    default: false
+
+  fn_application_name:
+    type: string
+    title: "Function Application Name"
+    default: "automation-app"
+    description: "Display name of the Function Application to deploy the autoregistration serverless function to"
+    required: true
+
+  create_fn_function:
+    type: boolean
+    title: "Deploy autoregistration function"
+    description: "This will deploy an autoregistration function from an OCI registry. For Frankfurt region a sample image is available."
+    required: true
+    default: false
+
+  fn_function_image:
+    type: string
+    title: "Function Image"
+    description: "Qualified name of image to use, e.g. 'phx.ocir.io/ten/functions/function:0.0.1'. For Frankfurt region a sample image can be provided, for all other regions you will need to provide the image yourself."
+    required: true
+    default: "eu-frankfurt-1.ocir.io/fr4sem1lm5ss/fn-automation/event-dns-autoregister:latest"
+    visible: ${create_fn_function}
+
+  create_tags_fn_application_config:
+    type: boolean
+    title: "Add tags defined above to the configuration for the autoregistration function."
+    description: "This will add the tag namespace and tags defined in the autoregistration tags section to the autoregistration function configuration. You can omit this if default tags are used."
+    required: true
+    default: false
+
+  create_autoregister_event:
+    type: boolean
+    title: "Create autoregister event"
+    description: "This will create the event and actions to handle vm updates and register the vm with the private DNS zone."
+    required: true
+    default: false
+    visible: ${create_fn_function}
+
+  create_autoregistration_app_function:
+    type: boolean
+    title: "Create autoregister application and function"
+    description: "This will enable options to create the Oracle Functions application, function for autoregistration of VMs and corresponding events."
+    required: true
+    default: false
+
+outputs:
+  private_vm_private_ip:
+    type: string
+    #    title: Private VM Private IP
+    displayText: Private VM Private IP
+    visible: ${create_oci_private_demo_vm}
+
+  public_vm_private_ip:
+    type: string
+    #    title: Private VM Private IP
+    displayText: Public VM Private IP
+    visible: ${create_oci_public_demo_vm}
+
+  public_vm_public_ip:
+    type: string
+    #    title: Private VM Private IP
+    displayText: Public VM Public IP
+    visible: ${create_oci_public_demo_vm}
+
+outputGroups:
+  - title: Sample Virtual Machines
+    outputs:
+      - private_vm_private_ip
+      - public_vm_private_ip
+      - public_vm_public_ip
+    visible:
+      or:
+        - or: ${create_oci_private_demo_vm}
+        - or: ${create_oci_public_demo_vm}
