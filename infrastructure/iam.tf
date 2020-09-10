@@ -65,8 +65,9 @@ resource "oci_identity_policy" "fn_dyn_policy" {
     oci_identity_dynamic_group.fn_dyn_grp
   ]
   statements = [
-    "allow dynamic-group fn-dyn-grp-dns-autoregister to manage dns-family in compartment id ${var.oci_compartment_ocid}",
-    "allow dynamic-group fn-dyn-grp-dns-autoregister to use all-resources in compartment id ${var.oci_compartment_ocid}",
+    "allow dynamic-group fn-dyn-grp-dns-autoregister to manage dns-family in compartment id ${var.oci_dns_zone_compartment}",
+    "allow dynamic-group fn-dyn-grp-dns-autoregister to manage virtual-network-family in compartment id ${var.oci_dns_zone_compartment}",
+    "allow dynamic-group fn-dyn-grp-dns-autoregister to use all-resources in compartment id ${var.oci_dns_zone_compartment}",
   ]
 }
 

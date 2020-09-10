@@ -35,14 +35,14 @@ variableGroups:
       - create_dhcp_options_separate
     visible: ${create_new_network}
 
-  - title: "Create Demo VM in private subnet"
+  - title: "Create sample VM in private subnet"
     variables:
       - oci_private_demo_vm_name
       - oci_private_demo_vm_shape
       - oci_private_demo_vm_sshkey
     visible: ${create_oci_private_demo_vm}
 
-  - title: "Create Demo VM in public subnet"
+  - title: "Create sample VM in public subnet"
     variables:
       - oci_public_demo_vm_name
       - oci_public_demo_vm_shape
@@ -101,7 +101,7 @@ variables:
 
   public_dns_server:
     title: "Public DNS Server"
-    description: "IP of the DNS server that will be used for public DNS record lookup."
+    description: "IP of the DNS server that will be used for public DNS record lookup. Defaults to an Oracle OCI DNS server."
     type: string
     required: true
     default: "169.254.169.254"
@@ -111,7 +111,7 @@ variables:
     title: "DNS Zone Compartment"
     default: ${tenancy_ocid}
     description: "Compartment that DNS Zone will be created in. Use the topmost compartment containing the compartments that will be using private DNS records, e.g. root."
-    required: false
+    required: true
 
   create_new_network:
     type: boolean
@@ -123,7 +123,6 @@ variables:
     type: oci:identity:compartment:id
     title: "VCN Compartment"
     description: "Compartment that VCN will be created in"
-    default: ${tenancy_ocid}
     required: true
 
   oci_cidr_vcn:
@@ -167,7 +166,7 @@ variables:
 
   create_oci_private_demo_vm:
     type: boolean
-    title: "Create demo VM in private subnet"
+    title: "Create sample VM in private subnet"
     description: ""
     required: false
     default: false
@@ -175,14 +174,14 @@ variables:
   oci_private_demo_vm_name:
     type: string
     title: "VM Name"
-    required: false
+    required: true
     default: "vmprivate"
     pattern: "^[a-z][a-zA-Z0-9]+$"
 
   oci_private_demo_vm_shape:
     type: oci:core:instanceshape:name
     title: "VM Shape"
-    required: false
+    required: true
     default: "VM.Standard2.1"
     dependsOn:
       compartmentId: ${oci_compartment_ocid}
@@ -194,7 +193,7 @@ variables:
 
   create_oci_public_demo_vm:
     type: boolean
-    title: "Create demo VM in public subnet"
+    title: "Create sample VM in public subnet"
     description: ""
     required: false
     default: false
@@ -202,14 +201,14 @@ variables:
   oci_public_demo_vm_name:
     type: string
     title: "VM Name"
-    required: false
+    required: true
     default: "vmpublic"
     pattern: "^[a-z][a-zA-Z0-9]+$"
 
   oci_public_demo_vm_shape:
     type: oci:core:instanceshape:name
     title: "VM Shape"
-    required: false
+    required: true
     default: "VM.Standard2.1"
     dependsOn:
       compartmentId: ${oci_compartment_ocid}
@@ -230,7 +229,7 @@ variables:
     type: string
     title: "DNS Zone name"
     required: true
-    default: "cloud.dev"
+    default: "dev.oci"
 
   create_autoregistration_tags:
     type: boolean
@@ -276,22 +275,22 @@ variables:
 
   create_automation_user:
     type: boolean
-    title: "Create a user for development and deployment of serverless functions"
-    description: "This creates a demo user with according rights to deploy serverless functions. Do not do this in tenancies where you plan to run production workloads in."
+    title: "Set up tenancy for serverless functions"
+    description: "This creates a user with necessary rights to deploy serverless functions. As well the required policies for functions will be created. <em>Skip this only if you already have set up your tenancy for functions.</em>"
     required: true
     default: false
 
   fn_use_existing_network:
     type: boolean
     title: "Use existing network for functions"
-    description: "If unchecked the network created with this stack in the 'Create New Network' section will be used."
+    description: "If unchecked a new VCN for function execution will be created. If using an existing network, try to use a public subnet for functions to work. For private subnets you will need to set up a service gateway."
     required: true
     default: false
 
   fn_application_compartment:
     type: oci:identity:compartment:id
     title: "Functions Compartment"
-    description: "This is the compartment for the Functions Application."
+    description: "This is the compartment for the function application network."
     required: true
     visible: ${fn_use_existing_network}
 
@@ -313,7 +312,7 @@ variables:
   create_new_fn_application:
     type: boolean
     title: "Create a new Functions Application"
-    description: "This will create new application with name set in Function Application Name"
+    description: "This will create new application with name set in Function Application Name."
     required: true
     default: false
 
@@ -321,7 +320,7 @@ variables:
     type: string
     title: "Function Application Name"
     default: "automation-app"
-    description: "Display name of the Function Application to deploy the autoregistration serverless function to"
+    description: "Display name of the functin application to deploy the autoregistration serverless function to."
     required: true
 
   create_fn_function:
@@ -364,20 +363,17 @@ variables:
 outputs:
   private_vm_private_ip:
     type: string
-    #    title: Private VM Private IP
-    displayText: Private VM Private IP
+    displayText: "Private VM private IP"
     visible: ${create_oci_private_demo_vm}
 
   public_vm_private_ip:
     type: string
-    #    title: Private VM Private IP
-    displayText: Public VM Private IP
+    displayText: "Public VM Private IP"
     visible: ${create_oci_public_demo_vm}
 
   public_vm_public_ip:
     type: string
-    #    title: Private VM Private IP
-    displayText: Public VM Public IP
+    displayText: "Public VM Public IP"
     visible: ${create_oci_public_demo_vm}
 
 outputGroups:

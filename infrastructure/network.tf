@@ -46,3 +46,7 @@ resource "oci_core_default_route_table" "default_route_table" {
     destination       = "0.0.0.0/0"
   }
 }
+
+
+
+
