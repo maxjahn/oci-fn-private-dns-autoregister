@@ -17,3 +17,7 @@ jobs:
         with:
           name: orm_stack_private_dns.zip
           path: orm_stack_private_dns.zip
+      - uses: actions/download-artifact@v2
+        with:
+          name: orm_stack_private_dns.zip
+          path: ~/release
