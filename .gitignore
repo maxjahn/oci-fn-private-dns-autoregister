@@ -16,8 +16,8 @@
 infrastructure/terraform.tfvars
 **/.terraform
 **/*.tfstate*
-infrastructure/orm-stack-dnszone.zip
-infrastructure/orm-zip.sh
+infrastructure/*.zip
 infrastructure/ips.txt
+infrastructure/orm*
 **/local_*
-.DS_Store
+**/.DS_Store

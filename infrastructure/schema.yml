@@ -31,6 +31,7 @@ variableGroups:
       - oci_cidr_public_subnet
       - create_oci_private_demo_vm
       - create_oci_public_demo_vm
+      - create_oci_hybrid_dns
       - public_dns_server
       - create_dhcp_options_separate
     visible: ${create_new_network}
@@ -53,6 +54,7 @@ variableGroups:
     variables:
       - fn_application_name
       - create_new_fn_application
+      - create_fn_application_log
       - fn_use_existing_network
       - fn_application_compartment
       - fn_application_vcn
@@ -62,13 +64,14 @@ variableGroups:
       - create_autoregistration_tags
       - create_tags_fn_application_config
       - create_autoregister_event
+      - create_events_log
     visible: ${create_autoregistration_app_function}
 
   - title: "Users & Policies"
     variables:
       - create_iam_dyngroup
       - create_iam_dyngroup_policy
-      - create_automation_user
+      - create_faas_iam_setup
     visible: ${create_autoregistration_app_function}
 
   - title: "Autoregistration Tags"
@@ -99,12 +102,20 @@ variables:
     required: true
     visible: false
 
+  create_oci_hybrid_dns:
+    type: boolean
+    title: "Enable OCI public DNS fallback (mild hybrid DNS)"
+    description: ""
+    required: true
+    default: true
+
   public_dns_server:
     title: "Public DNS Server"
-    description: "IP of the DNS server that will be used for public DNS record lookup. Defaults to an Oracle OCI DNS server."
+    description: "IP of the DNS server that will be used for public DNS record lookup. Defaults to an Oracle OCI metadata server."
     type: string
     required: true
     default: "169.254.169.254"
+    visible: ${create_oci_hybrid_dns}
 
   oci_dns_zone_compartment:
     type: oci:identity:compartment:id
@@ -231,6 +242,20 @@ variables:
     required: true
     default: "dev.oci"
 
+  create_fn_application_log:
+    type: boolean
+    title: "Enable logging for application"
+    description: "This will enable logging of invokations of the function application."
+    required: true
+    default: false
+
+  create_events_log:
+    type: boolean
+    title: "Enable logging for events"
+    description: "This will enable logging of triggered events."
+    required: true
+    default: false
+
   create_autoregistration_tags:
     type: boolean
     title: "Create Tag Namespace and Tags for Autoregistration"
@@ -273,7 +298,7 @@ variables:
     required: true
     default: false
 
-  create_automation_user:
+  create_faas_iam_setup:
     type: boolean
     title: "Set up tenancy for serverless functions"
     description: "This creates a user with necessary rights to deploy serverless functions. As well the required policies for functions will be created. <em>Skip this only if you already have set up your tenancy for functions.</em>"

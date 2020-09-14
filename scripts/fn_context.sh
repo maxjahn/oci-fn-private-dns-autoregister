@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# Renders a text based list of options that can be selected by the
-# user using up, down and enter keys and returns the chosen option.
-#
-#   Arguments   : list of options, maximum of 256
-#                 "opt1" "opt2" ...
-#   Return value: selected index (0 for opt1, 1 for opt2 ...)
 function select_option {
 
     # little helpers for terminal print control and key input

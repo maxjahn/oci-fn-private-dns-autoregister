@@ -70,7 +70,7 @@ resource "oci_core_default_dhcp_options" "default-dhcp-options" {
   options {
     type               = "DomainNameServer"
     server_type        = "CustomDnsServer"
-    custom_dns_servers = concat(slice(local.dns_servers_ips, 0, min(length(local.dns_servers_ips), 2)), [var.public_dns_server])
+    custom_dns_servers = concat(slice(local.dns_servers_ips, 0, min(length(local.dns_servers_ips), 2)), [ var.create_oci_hybrid_dns ? var.public_dns_server : ""])
   }
 
   options {

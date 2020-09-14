@@ -30,7 +30,7 @@ tag_autoregister_dnshostname = "DNSHostname"
 
 create_iam_dyngroup = true
 create_iam_dyngroup_policy = true
-create_automation_user = true
+create_faas_iam_setup = true
 create_new_fn_application = true
 
 fn_application_name = "automation-app"
