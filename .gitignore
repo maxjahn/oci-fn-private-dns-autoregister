@@ -22,4 +22,4 @@ infrastructure/orm*
 infrastructure/modules**
 **/local_*
 **/.DS_Store
-.devcontainer/**
+.vscode/**

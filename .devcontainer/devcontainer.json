@@ -1,0 +1,30 @@
+{
+  "name": "OCI dev tools",
+  "dockerFile": "Dockerfile",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.oci,target=/home/vscode/.oci,type=bind,consistency=cached"
+  ],
+  // Use this environment variable if you need to bind mount your local source code into a new container.
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  },
+  // Set *default* container specific settings.json values on container create.
+  "settings": {
+    "terminal.integrated.shell.linux": "/usr/bin/zsh"
+  },
+  // Add the IDs of extensions you want installed when the container is created.
+  "extensions": [
+    "ms-azuretools.vscode-docker",
+    "hashicorp.terraform",
+    "golang.go"
+  ],
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "ln -s /go /home/vscode/go",
+  // Uncomment the next two lines to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+  "overrideCommand": false,
+  "remoteUser": "vscode"
+}
