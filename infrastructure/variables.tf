@@ -20,6 +20,7 @@ variable "oci_public_subnet_name" { default = "public-subnet" }
 variable "oci_cidr_public_subnet" { default = "10.0.2.0/24" }
 variable "create_oci_hybrid_dns" {default = true}
 
+
 #demo vms
 variable "create_oci_private_demo_vm" { default = false }
 variable "create_oci_public_demo_vm" { default = false }

@@ -12,6 +12,7 @@ variableGroups:
       - region
       - oci_user_ocid
       - oci_fingerprint
+      - create_oci_dnsmasq
 
   - title: "DNS Zone"
     variables:
@@ -35,6 +36,13 @@ variableGroups:
       - public_dns_server
       - create_dhcp_options_separate
     visible: ${create_new_network}
+
+  - title: "Create dnsmasq subnet and servers"
+    variables:
+      - oci_forward_subnet_cidr
+      - oci_dnsmasq_shape
+      - oci_dnsmasq_sshkey
+    visible: false
 
   - title: "Create sample VM in private subnet"
     variables:
@@ -109,6 +117,14 @@ variables:
     required: true
     default: true
 
+  create_oci_dnsmasq:
+    type: boolean
+    title: "Create subnet and servers for dnsmasq(hybrid DNS)"
+    description: ""
+    required: true
+    default: false
+    visible: false
+
   public_dns_server:
     title: "Public DNS Server"
     description: "IP of the DNS server that will be used for public DNS record lookup. Defaults to an Oracle OCI metadata server."
@@ -123,6 +139,26 @@ variables:
     default: ${tenancy_ocid}
     description: "Compartment that DNS Zone will be created in. Use the topmost compartment containing the compartments that will be using private DNS records, e.g. root."
     required: true
+
+  oci_dnsmasq_shape:
+    type: oci:core:instanceshape:name
+    title: "VM Shape"
+    required: true
+    default: "VM.Standard2.1"
+    dependsOn:
+      compartmentId: ${oci_compartment_ocid}
+
+  oci_forward_subnet_cidr:
+    type: string
+    title: "Subnet CIDR"
+    required: true
+    default: "10.0.99.0/24"
+    pattern: "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]).(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\/(3[0-2]|[1-2]?[0-9])$"
+
+  oci_dnsmasq_sshkey:
+    type: string
+    title: "Public SSH Key for VM"
+    required: false
 
   create_new_network:
     type: boolean

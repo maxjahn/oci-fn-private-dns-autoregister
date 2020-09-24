@@ -19,5 +19,7 @@ infrastructure/terraform.tfvars
 infrastructure/*.zip
 infrastructure/ips.txt
 infrastructure/orm*
+infrastructure/modules**
 **/local_*
 **/.DS_Store
+.devcontainer/**

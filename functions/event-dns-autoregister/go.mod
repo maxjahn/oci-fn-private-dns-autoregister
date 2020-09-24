@@ -1,2 +1,3 @@
-
 module func
+
+go 1.14

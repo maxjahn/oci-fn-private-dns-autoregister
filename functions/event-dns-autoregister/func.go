@@ -13,6 +13,8 @@ import (
 	"github.com/oracle/oci-go-sdk/common/auth"
 	"github.com/oracle/oci-go-sdk/core"
 	"github.com/oracle/oci-go-sdk/dns"
+
+	fdktools "github.com/maxjahn/fdk-go-tools"
 )
 
 // EventsInput structure will match the OCI events format
@@ -50,7 +52,11 @@ type EventsInput struct {
 	} `json:"data"`
 }
 
+//
+var logger *log.Logger
+
 func main() {
+	logger = fdktools.InitLogger("fn/event-dns-autoregister")
 	fdk.Handle(fdk.HandlerFunc(updateDNSHandler))
 }
 
@@ -83,7 +89,7 @@ func updateDNSHandler(ctx context.Context, in io.Reader, out io.Writer) {
 
 	// exit if no DNSZone found
 	if primaryDnszone == "" {
-		log.Println("Not matching tag found, skipping DNS record creating for ", event.Data.ResourceID)
+		logger.Println("No matching tag found, skipping DNS record creation for " + event.Data.ResourceID)
 		return
 	}
 
@@ -95,35 +101,35 @@ func updateDNSHandler(ctx context.Context, in io.Reader, out io.Writer) {
 	// exit function if any of the client initializations fail
 	provider, err := auth.ResourcePrincipalConfigurationProvider()
 	if err != nil {
-		log.Fatalln("Error: ", err)
+		logger.Fatalln("Error: ", err)
 	}
 	computeClient, err := core.NewComputeClientWithConfigurationProvider(provider)
 	if err != nil {
-		log.Fatalln("Error: ", err)
+		logger.Fatalln("Error: ", err)
 	}
 	vnicattachments, err := computeClient.ListVnicAttachments(ctx, core.ListVnicAttachmentsRequest{CompartmentId: &event.Data.CompartmentID, InstanceId: &event.Data.ResourceID})
 	if err != nil {
-		log.Fatalln("Error: ", err)
+		logger.Fatalln("Error: ", err)
 	}
 	vncClient, err := core.NewVirtualNetworkClientWithConfigurationProvider(provider)
 	if err != nil {
-		log.Fatalln("Error: ", err)
+		logger.Fatalln("Error: ", err)
 	}
 	dnsClient, err := dns.NewDnsClientWithConfigurationProvider(provider)
 	if err != nil {
-		log.Fatalln("Error: ", err)
+		logger.Fatalln("Error: ", err)
 	}
 
 	for _, vnicattachment := range vnicattachments.Items {
 
 		vnic, err := vncClient.GetVnic(ctx, core.GetVnicRequest{VnicId: vnicattachment.VnicId})
 		if err != nil {
-			log.Println("Error: ", err)
+			logger.Println("Error: ", err)
 			continue
 		}
 		ips, err := vncClient.ListPrivateIps(ctx, core.ListPrivateIpsRequest{VnicId: vnicattachment.VnicId})
 		if err != nil {
-			log.Println("Error: ", err)
+			logger.Println("Error: ", err)
 			continue
 		}
 
@@ -166,9 +172,9 @@ func updateDNSHandler(ctx context.Context, in io.Reader, out io.Writer) {
 				},
 			})
 			if err != nil {
-				log.Println("Error when trying to update DNS Zone: ", err)
+				logger.Println("Error when trying to update DNS Zone: ", err)
 			}
-			log.Printf("%s operation for DNS record A %s %s completed successfully.\n", recOperation, recDomain, *ip.IpAddress)
+			logger.Println(fmt.Sprintf("%s operation for DNS record A %s %s completed successfully.\n", recOperation, recDomain, *ip.IpAddress))
 		}
 	}
 
