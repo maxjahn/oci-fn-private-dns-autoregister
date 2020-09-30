@@ -80,26 +80,6 @@ echo
 source_image="maxjahn/event-dns-autoregister:latest"
 destination_image="fn-automation/event-dns-autoregister:latest"
 
-# repos=`curl -s -H GET https://hub.docker.com/v2/repositories/maxjahn/ | jq -r '.results|.[]|.name'`
-
-# echo "Select dockerhub source repo:"
-# echo
-
-# select_option "${repos[@]}"
-# choice=$?
-
-# source_repo=${repos[$choice]}
-
-# tags=`curl -v -X GET https://hub.docker.com/v2/repositories/maxjahn/${source_repo}/tags | jq -r '.results|.[]|.name'`
-# echo "Select tag to pull:"
-# echo
-
-# select_option "${tags[@]}"
-# choice=$?
-
-source_tag=${tags[$choice]}
-
-
 regions=(`oci iam region-subscription list --query 'data[]."region-name"' --output json | jq -r '.[]'`)
 
 echo "Select from your subscribed regions:"

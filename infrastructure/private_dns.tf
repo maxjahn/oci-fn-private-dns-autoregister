@@ -45,6 +45,11 @@ data "local_file" "file_ips" {
 }
 ## /hack
 
+
+# TODO: add sane solution using DNS module if launched outside of OCI Resource Manager
+
+
+
 resource "oci_core_dhcp_options" "private_dns_dhcp_options" {
   count          = var.create_dhcp_options_separate ? 1 : 0
   compartment_id = var.oci_compartment_ocid
